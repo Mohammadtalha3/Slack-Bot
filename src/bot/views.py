@@ -3,10 +3,15 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 import json
+<<<<<<< HEAD
 import requests
 
+=======
+>>>>>>> b0bf6897e025db2d6b8645e5e5d3ef8e6a93b28a
 import helper
+import os 
 
+<<<<<<< HEAD
 SLACK_BOT_OAUTH= helper.config('SLACK_BOT_OAUTH',  cast=str)
 
 
@@ -36,6 +41,9 @@ def send_message(message, channel_id= None):
     
  
 
+=======
+SLACK_BOT_OAUTH= helper.config('SLACK_BOT_OAUTH', cast=str)
+>>>>>>> b0bf6897e025db2d6b8645e5e5d3ef8e6a93b28a
 
 # Create your views here.
 
