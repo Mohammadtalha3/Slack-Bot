@@ -3,10 +3,10 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 import json
-
 import helper
+import os 
 
-SLACK_BOT_OAUTH= helper.config('SLACK_BOT_OAUTH', Default= None, cast=str)
+SLACK_BOT_OAUTH= helper.config('SLACK_BOT_OAUTH', cast=str)
 
 # Create your views here.
 
