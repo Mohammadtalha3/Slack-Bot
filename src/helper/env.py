@@ -16,9 +16,9 @@ REPO_DIR_ENV= REPO_DIR / ".env"
 
 @lru_cache 
 def get_config():
-    if BASE_DIR_ENV.exist():
+    if BASE_DIR_ENV.exists():
         return Config(RepositoryEnv(str(BASE_DIR_ENV)))
-    if  REPO_DIR_ENV.exist():
+    if  REPO_DIR_ENV.exists():
         return Config(RepositoryEnv(str(REPO_DIR_ENV)))
         # return config
     

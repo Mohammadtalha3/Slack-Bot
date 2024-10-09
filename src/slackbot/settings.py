@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import helper
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,7 +27,7 @@ SECRET_KEY = "django-insecure-r6+o4#t=d=n+9ramj&zo2)68s!r3)ix_8+foz0iuye%n)6opt4
 DEBUG = True
 
 ALLOWED_HOSTS = ['localhost','127.0.0.1',".ngrok-free.app"]
-CSRF_TRUSTED_ORIGINS= ["https://3029-182-188-61-104.ngrok-free.app "]
+CSRF_TRUSTED_ORIGINS= ["https://4627-182-188-61-104.ngrok-free.app"]
 
 
 # Application definition
@@ -38,6 +39,9 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django_celery_beat",
+    "django_celery_results",
+    "bot",
 ]
 
 MIDDLEWARE = [
@@ -121,7 +125,25 @@ STATIC_URL = "static/"
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
+from dotenv import load_dotenv
+load_dotenv()
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# CELERY_BROKER_URL= helper.config("CELERY_BROKER_URL", cast= str)
+
+CELERY_BROKER_URL= load_dotenv('CELERY_BROKER_URL')
+
+
 
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+CELERY_BEAT_SCHEDULER= "django_celery_beat.schedulers.DatabaseScheduler"
+
+
+
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP= True
+
+CELERY_REDIS_BACKEND_USE_SSL= True
+
+CELERY_BROKER_USE_SSL= False

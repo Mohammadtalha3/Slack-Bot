@@ -1,49 +1,14 @@
-from django.shortcuts import render
-from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+from django.http import HttpResponse
+from SlackClient import send_message
+from bot.tasks import slack_message_task
+from pprint import pprint
 import json
-<<<<<<< HEAD
-import requests
-
-=======
->>>>>>> b0bf6897e025db2d6b8645e5e5d3ef8e6a93b28a
-import helper
-import os 
-
-<<<<<<< HEAD
-SLACK_BOT_OAUTH= helper.config('SLACK_BOT_OAUTH',  cast=str)
 
 
-def send_message(message, channel_id= None):
-
-    url = "https://slack.com/api/chat.postMessage"
-
-    headers={
-        'Content-Type' : "application/json; charset=utf-8",
-        'Authorization': f'Bearer {SLACK_BOT_OAUTH}',
-        "Accept": 'application/json'
-    }
-
-    data= {
-        "channel": f"{channel_id}",
-        "text": message
-    } 
-
-    print('Function here is triggering', data )  
-
-    return requests.post(url, json=data, headers= headers)
 
 
-    
-
-
-    
- 
-
-=======
-SLACK_BOT_OAUTH= helper.config('SLACK_BOT_OAUTH', cast=str)
->>>>>>> b0bf6897e025db2d6b8645e5e5d3ef8e6a93b28a
 
 # Create your views here.
 
@@ -57,14 +22,6 @@ def bot_events(request):
         pass 
     data_types= json_data.get('type')
 
-    print('These are data types',data_types)
-
-    
-
-
-    print('These are the json keys', json_data.keys())
-
-    print(data_types, json_data)
     allowed_data_types=[
         'event_callback',
         'url_verification'
@@ -73,19 +30,22 @@ def bot_events(request):
         return HttpResponse('Not Allowed', status= 400)   
     if data_types =='url_verification':
         challenge= json_data.get('challenge')
-        if challenge is None:
-            return HttpResponse('Not Allowed', status= 400)
-        print('Here is the challenge', challenge)
+        if challenge:
+            return HttpResponse(challenge, status= 200)
+        else:
+            return HttpResponse('Not Allowed Challenge missing', status= 400)
     elif data_types==  'event_callback':
-        event= json_data.get('event')
-        text= event.get('text')
-        print('this is text data', text)
+        event= json_data.get('event') or {}
+        try:
+            text= event['blocks'][0]['elements'][0]['elements'][1]['text']
+        except:
+            text= event.get('text')
+        user_id= event.get('user')     
         channel_id= event.get('channel')
-
-        print('this is channel id ', channel_id)
-
-
-        r=send_message(text, channel_id=channel_id)
+        msg_ts= event.get('ts')
+        thread_ts= event.get('thread_ts') or msg_ts
+        # send_message(text, channel_id=channel_id, user_id=user_id, thread_ts=thread_ts)
+        slack_message_task.delay(text, channel_id=channel_id, user_id=user_id, thread_ts=thread_ts)
        
         return  HttpResponse("Success", status= 200 )
     return HttpResponse('Success', status= 200)
