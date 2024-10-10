@@ -2,13 +2,6 @@ import requests
 import helper
 
 
-
-
-
-
-
-
-
 SLACK_BOT_OAUTH= helper.config('SLACK_BOT_OAUTH',  cast=str)
 
 
