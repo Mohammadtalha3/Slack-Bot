@@ -3,6 +3,10 @@ python-decouple
 requests
 Celery
 Redis
-dotenv
+python-dotenv
 django-celery-beat
 django-celery-results
+ollama
+llama-index
+
+

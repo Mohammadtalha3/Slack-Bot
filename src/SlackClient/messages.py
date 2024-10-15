@@ -7,8 +7,9 @@ SLACK_BOT_OAUTH= helper.config('SLACK_BOT_OAUTH',  cast=str)
 
 def send_message(message, channel_id= None, user_id= None, thread_ts= None):
 
+    print('this is the messsage we are receiving in the send_message function', message)
     url = "https://slack.com/api/chat.postMessage"
-
+    
     headers={
         'Content-Type' : "application/json; charset=utf-8",
         'Authorization': f'Bearer {SLACK_BOT_OAUTH}',
