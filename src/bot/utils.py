@@ -14,5 +14,11 @@ def response_model (message, llm_model= 'llama3.2'):
     return model.invoke(formatted_prompt)
 
     
+
+
+
+
+
+    
     
 

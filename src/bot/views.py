@@ -51,13 +51,13 @@ def bot_events(request):
         
         # send_message(text, channel_id=channel_id, user_id=user_id, thread_ts=thread_ts)
         # function directory: bot/tasks.py
-        slack_message_task.delay('Working...', channel_id=channel_id, user_id=user_id, thread_ts=thread_ts)
+        # slack_message_task.delay('Working...', channel_id=channel_id, user_id=user_id, thread_ts=thread_ts)
 
         slack_message_task.apply_async(kwargs={
             "message": text,
             "channel_id": channel_id,
             "user_id": user_id,
             "thread_ts": thread_ts
-        }, countdown= 30) # this is async whihc will delay the final message by the 15 seconds as we have set the countdown
+        }, countdown= 0) # this is async whihc will delay the final message by the 15 seconds as we have set the countdown
         return  HttpResponse("Success", status= 200 )
     return HttpResponse('Success', status= 200)
