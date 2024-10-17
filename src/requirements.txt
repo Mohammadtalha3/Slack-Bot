@@ -8,7 +8,9 @@ django-celery-beat
 django-celery-results
 ollama
 llama-index
+llama-parse
 langchain-ollama
 jupyter
 
 
+    
