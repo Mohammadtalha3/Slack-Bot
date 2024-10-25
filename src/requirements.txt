@@ -11,6 +11,3 @@ llama-index
 llama-parse
 langchain-ollama
 jupyter
-
-
-    
