@@ -12,6 +12,7 @@ def response_model (message, llm_model= 'llama3.2'):
     formatted_prompt = prompt_template.format(query=message)
 
     return model.invoke(formatted_prompt)
+    
 
     
 
