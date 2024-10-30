@@ -1,0 +1,155 @@
+# from Document_processing import DocumentPreprocessing
+from sentence_transformers import SentenceTransformer
+from typing import List,Dict, Any
+import weaviate
+import uuid
+
+class OpenSourceEmbeddings:
+    def __init__(self,model_name: str = "all-MiniLM-L6-v2"):
+        self.model= SentenceTransformer(model_name)
+
+
+    def embed_documents(self, full_text: list[str])-> List[List[str]]:
+        return self.model.encode(full_text).tolist()
+
+    def query_embd(self, query)-> List[float]:
+        return self.model.encode(query) 
+
+class DocumentRetriever:
+    def __init__(self, weaviate_url: str = "http://localhost:8080"):
+        self.embeddings =OpenSourceEmbeddings()
+        self.client = weaviate.Client(
+            url=weaviate_url,
+            additional_headers={
+                "X-OpenAI-Api-Key": None
+            }
+        )
+        self.index_name = "Documentation"
+        self._create_schema()
+    
+    def _create_schema(self):
+        """Create the Weaviate schema for documentation chunks"""
+        schema = {
+            "class": self.index_name,
+            "properties": [
+                {
+                    "name": "content",
+                    "dataType": ["text"],
+                },
+                {
+                    "name": "section",
+                    "dataType": ["string"],
+                },
+                {
+                    "name": "is_code",
+                    "dataType": ["boolean"],
+                },
+                {
+                    "name": "language",
+                    "dataType": ["string"],
+                },
+                {
+                    "name": "filename",
+                    "dataType": ["string"],
+                }
+            ],
+            "vectorizer": "none"  # We'll manually add vectors
+        }
+    
+    def search(self, query: str, k: int = 3, filters: Dict[str, Any] = None):
+        """
+        Search for relevant documents with duplicate prevention
+        Args:
+            query (str): The search query
+            k (int): Number of unique results to return
+            filters (dict): Optional filters (e.g., {"section": "2.1.1"})
+        """
+        # Generate query vector
+        query_vector = self.embeddings.query_embd(query)
+        
+        # Request more results than needed to account for potential duplicates
+        search_k = k * 2
+        
+        # Prepare the query
+        query_obj = (
+            self.client.query
+            .get(self.index_name, ["content", "section", "is_code", "language", "filename"])
+            .with_near_vector({
+                "vector": query_vector,
+                "certainty": 0.7
+            })
+            .with_limit(search_k)  # Request more results
+            .with_additional(["certainty", "id"])  # Add ID for deduplication
+        )
+        
+        # Add filters if provided
+        if filters:
+            where_filter = {"operator": "And", "operands": []}
+            for key, value in filters.items():
+                where_filter["operands"].append({
+                    "path": [key],
+                    "operator": "Equal",
+                    "valueString": value
+                })
+            query_obj = query_obj.with_where(where_filter)
+        
+        # Execute the query
+        result = query_obj.do()
+        
+        # Format and deduplicate results
+        unique_results = []
+        seen_contents = set()
+        
+        if result and "data" in result and "Get" in result["data"]:
+            objects = result["data"]["Get"][self.index_name]
+            
+            for obj in objects:
+                content = obj["content"]
+                if content not in seen_contents:
+                    seen_contents.add(content)
+                    certainty = obj.get("_additional", {}).get("certainty", 0)
+                    unique_results.append((obj, certainty))
+                    
+                    # Break if we have enough unique results
+                    if len(unique_results) >= k:
+                        break
+        
+        return unique_results[:k]
+
+    def search_with_metadata(self, query: str, k: int = 3, filters: Dict[str, Any] = None):
+        """
+        Enhanced search that returns results with detailed metadata and prevents duplicates
+        """
+        results = self.search(query, k, filters)
+        
+        formatted_results = []
+        for doc, score in results:
+            formatted_results.append({
+                'content': doc['content'],
+                'metadata': {
+                    'section': doc['section'],
+                    'is_code': doc['is_code'],
+                    'language': doc['language'],
+                    'filename': doc['filename'],
+                    'similarity_score': score
+                }
+            })
+        
+        return formatted_results
+    
+
+if __name__ == "__main__":
+    retriever = DocumentRetriever()
+    
+    # Example search
+    query = "How to use templates in django?"
+    results = retriever.search_with_metadata(query, k=3)
+    
+    print("\nSearch Results:")
+    for idx, result in enumerate(results, 1):
+        print(f"\nResult {idx}:")
+        print(f"Score: {result['metadata']['similarity_score']:.4f}")
+        print(f"Section: {result['metadata']['section']}")
+        print(f"File: {result['metadata']['filename']}")
+        print(f"Content Preview: {result['content']}...")
+        print("-" * 80)
