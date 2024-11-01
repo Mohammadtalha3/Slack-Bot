@@ -1,14 +1,23 @@
 from langchain_ollama import OllamaLLM
 from langchain_core.prompts import PromptTemplate
-from retrival_Engine import DocumentRetriever
+from .retrival_Engine import DocumentRetriever
+
+# from langchain_core.prompts import PromptTemplate
+
+
 
 
 class ResponseModel:
 
 # This function takes message and we responed with LLM generated response 
-    def response_model (self,message, llm_model= 'llama3.2'):
+    @classmethod
+    def response_model (cls,message, llm_model= 'llama3.2'):
         model= OllamaLLM(model=llm_model)
         retriver= DocumentRetriever()
+
+        # print('This is the message in the response model', message)
+
+        print('Yes triggered by the slack_shared message')
 
         relevant_chunk= retriver.search_with_metadata(message)
 
@@ -20,10 +29,10 @@ class ResponseModel:
         return model.invoke(formatted_prompt)
     
 
-data=ResponseModel()
-dt2=data.response_model(message='How to use templates in django?')
+# data=ResponseModel()
+# dt2=data.response_model(message='How to use templates in django?')
 
-print(dt2)
+# print(dt2)
     
 
     

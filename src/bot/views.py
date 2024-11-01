@@ -5,7 +5,7 @@ from SlackClient import send_message
 from bot.tasks import slack_message_task
 from pprint import pprint
 import json
-from bot.utils import response_model
+# from bot.utils import response_model
 
 
 

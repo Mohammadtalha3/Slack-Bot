@@ -4,11 +4,12 @@ from typing import List,Dict, Any
 import weaviate
 import uuid
 
+
 class OpenSourceEmbeddings:
     def __init__(self,model_name: str = "all-MiniLM-L6-v2"):
         self.model= SentenceTransformer(model_name)
 
-
+    
     def embed_documents(self, full_text: list[str])-> List[List[str]]:
         return self.model.encode(full_text).tolist()
 
@@ -142,7 +143,9 @@ if __name__ == "__main__":
     retriever = DocumentRetriever()
     
     # Example search
-    query = "How to use templates in django?"
+    # query = " How can I see the raw SQL queries Django is running? "
+    # query= " how forms  works in django "
+    query= "What are forms used for?"
     results = retriever.search_with_metadata(query, k=3)
     
     print("\nSearch Results:")
@@ -150,6 +153,8 @@ if __name__ == "__main__":
         print(f"\nResult {idx}:")
         print(f"Score: {result['metadata']['similarity_score']:.4f}")
         print(f"Section: {result['metadata']['section']}")
-        print(f"File: {result['metadata']['filename']}")
-        print(f"Content Preview: {result['content']}...")
+        # print(f"iscode: {result['metadata']['is_code']}")
+        # print(f"File: {result['metadata']['filename']}")
+        print(f"Content Preview: {(result['content'])}...")
         print("-" * 80)
+        

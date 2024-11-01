@@ -53,6 +53,8 @@ class RagEngine:
     
         # Detect listing format
         listing_match = re.search(r'Listing\s+(\d+):\s*(.*?)$', text, re.MULTILINE)
+
+        # print('these are code patterns ', listing_match)
         
         is_code = False
         code_info = {
@@ -199,6 +201,7 @@ class RagEngine:
                         
                         if len(chunks) > 0:
                             chunks[-1]['metadata']['next_section'] = section_match.group(1)
+
                             
                     current_chunk = {
                         'metadata': {
@@ -311,17 +314,21 @@ if __name__ == "__main__":
     data_loaded=retriever.Data_loading()
 # Calling Chunking function
     chunks = retriever.chunk_document(data_loaded)
+    
 
     # Storing Chunks in weaviate( vector Store)
-    retriever.Index.add_chunks(chunks)
-
-    for chunk in chunks:
-     print(f"metadata {chunk['metadata']}")
-     print(f"Section {chunk['section']}")
-     print(f"Content {chunk['content'][:100]}")
+    Indexing=retriever.Index.add_chunks(chunks)
 
     
 
+
+    # for chunk in chunks:
+    #  print(f"metadata {chunk['metadata']}")
+    #  print(f"Section {chunk['section']}")
+    #  print(f"Content {chunk['content'][:100]}")
+
+
+    
 
     
     

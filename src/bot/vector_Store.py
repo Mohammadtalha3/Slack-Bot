@@ -2,6 +2,8 @@ import weaviate
 import redis
 import uuid
 from Document_processing import *
+from retrival_Engine import  OpenSourceEmbeddings
+
 
 
 class IndexManager:
@@ -81,10 +83,13 @@ class IndexManager:
         
         # Generate embeddings for all contents at once
         contents = [chunk["content"] for chunk in processed_chunks]
-        embeddings = self.embeddings.embed_documents(contents)
+
+        # print('This is the content ', contents)
+        embed= OpenSourceEmbeddings()
+        embeddings = embed.embed_documents(contents)
         
         # Add chunks to Weaviate with their vectors
-        with self.client.batch as batch:
+        with self.weavite_client.batch as batch:
             for chunk_data, vector in zip(processed_chunks, embeddings):
                 batch.add_data_object(
                     data_object=chunk_data,
