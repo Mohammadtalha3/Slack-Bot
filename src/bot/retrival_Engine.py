@@ -74,13 +74,16 @@ class DocumentRetriever:
         # Prepare the query
         query_obj = (
             self.client.query
-            .get(self.index_name, ["content", "section", "is_code", "language", "filename"])
-            .with_near_vector({
-                "vector": query_vector,
-                "certainty": 0.7
-            })
+            .get(self.index_name, ["content", "section", "is_code", "language", "filename"]) #
+            .with_hybrid(
+                query= query,
+                vector= query_vector,
+                alpha=0.7,
+                properties=['content', 'section']
+
+            )
             .with_limit(search_k)  # Request more results
-            .with_additional(["certainty", "id"])  # Add ID for deduplication
+            .with_additional(["score","id"])  # Add ID for deduplication  , "id"
         )
         
         # Add filters if provided
@@ -115,7 +118,9 @@ class DocumentRetriever:
                     if len(unique_results) >= k:
                         break
         
-        return unique_results[:k]
+        # return unique_results[:k]
+
+        return result
 
     def search_with_metadata(self, query: str, k: int = 3, filters: Dict[str, Any] = None):
         """
@@ -145,16 +150,36 @@ if __name__ == "__main__":
     # Example search
     # query = " How can I see the raw SQL queries Django is running? "
     # query= " how forms  works in django "
-    query= "What are forms used for?"
-    results = retriever.search_with_metadata(query, k=3)
+    # query= "What are forms used for?"
+    # query= "FAQ: Databases and models"
+    # query= 'Does Django support NoSQL databases?'
+    query= "Building a form "
+    # results = retriever.search_with_metadata(query, k=3)
+    search_results = retriever.search(query, k=3)
+
+    print(search_results['data']['Get']['Documentation'][0])
+
+    # from pprint import pprint
+
+    # print('this is the search retriver', pprint(search_results[:1000]))
+    # print(search_results['data']['Get']['Documentation'][1]['content'])
+
+
+
+
+
+
+
     
-    print("\nSearch Results:")
-    for idx, result in enumerate(results, 1):
-        print(f"\nResult {idx}:")
-        print(f"Score: {result['metadata']['similarity_score']:.4f}")
-        print(f"Section: {result['metadata']['section']}")
-        # print(f"iscode: {result['metadata']['is_code']}")
-        # print(f"File: {result['metadata']['filename']}")
-        print(f"Content Preview: {(result['content'])}...")
-        print("-" * 80)
+
+    
+    # print("\nSearch Results:")
+    # for idx, result in enumerate(results, 1):
+    #     print(f"\nResult {idx}:")
+    #     print(f"Score: {result['metadata']['similarity_score']:.4f}")
+    #     print(f"Section: {result['metadata']['section']}")
+    #     # print(f"iscode: {result['metadata']['is_code']}")
+    #     # print(f"File: {result['metadata']['filename']}")
+    #     print(f"Content Preview: {(result['content'])}...")
+    #     print("-" * 80)
         

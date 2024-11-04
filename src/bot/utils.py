@@ -19,12 +19,14 @@ class ResponseModel:
 
         print('Yes triggered by the slack_shared message')
 
-        relevant_chunk= retriver.search_with_metadata(message)
+        relevant_chunk= retriver.search(message)
+
+        print('this is the relevant chunk received', relevant_chunk)
 
         # Using promptTemplate modules from the langchain 
-        prompt_template="This is a Retrieval-Augmented Generation (RAG) system. Here is the user's query: {query}. Below is the relevant information retrieved: {chunk} also give the retrived chunk in response."
-
-        formatted_prompt = prompt_template.format(query=message,chunk=relevant_chunk)
+        # prompt_template="This is a Retrieval-Augmented Generation (RAG) system. Here is the user's query: {query}. Below is the relevant information retrieved: {chunk} also give the retrived chunk in relevant part and also rate the retrived chunk bassed on the query  and if retrived content has example liek html or code always add that in response."
+        prompt_template= 'Summarize the retrived chunk if you detect code specially keep it in the response. Here is the chunk {query}'
+        formatted_prompt = prompt_template.format(query=relevant_chunk)
 
         return model.invoke(formatted_prompt)
     

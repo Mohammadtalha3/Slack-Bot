@@ -11,6 +11,8 @@ import json
 import re
 from typing import List, Dict
 from datetime import datetime
+from vector_Store import DocumentCleaner
+
 
 
 
@@ -309,16 +311,34 @@ class RagEngine:
 if __name__ == "__main__":
     # Initialize the retriever
     retriever = RagEngine()
+    cleaner= DocumentCleaner()
     # retriever.Index.add_chunks()
     # loading Data 
     data_loaded=retriever.Data_loading()
 # Calling Chunking function
     chunks = retriever.chunk_document(data_loaded)
+    cleaned_chunks=cleaner.process_chunks(chunks)
+
+    print(cleaned_chunks)
+
     
 
-    # Storing Chunks in weaviate( vector Store)
-    Indexing=retriever.Index.add_chunks(chunks)
 
+    # print("Original content:")
+    # print(chunks['content'])
+    # print("\nCleaned content:")
+    # print(cleaned_chunks[0]['content'])
+
+
+    # Storing Chunks in weaviate( vector Store)
+    # Indexing=retriever.Index.add_chunks(chunks)
+
+
+    
+
+    
+
+    # print('This is zipped data',zipped_data[:100])
     
 
 
@@ -326,20 +346,3 @@ if __name__ == "__main__":
     #  print(f"metadata {chunk['metadata']}")
     #  print(f"Section {chunk['section']}")
     #  print(f"Content {chunk['content'][:100]}")
-
-
-    
-
-    
-    
-
-    
-
-
-
-    
-
-
-
-
-    
