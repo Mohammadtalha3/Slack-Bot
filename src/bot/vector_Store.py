@@ -83,7 +83,7 @@ class DocumentCleaner:
             if 'content' in chunk:
                 cleaned_content = self.clean_chunk(chunk['content'])
 
-                print(cleaned_content)
+                
                 
                 # Only include chunk if it still has meaningful content after cleaning
                 if cleaned_content and len(cleaned_content.strip()) > 50:  # Minimum content threshold
@@ -104,7 +104,7 @@ class IndexManager:
         self.redis_client=  redis.from_url(redis_url)
         self.doc_processing= DocumentPreprocessing(redis_url=redis_url)
         self.index_name="Documentation"
-        self._setup_schema()
+        # self._setup_schema()
         self._setup_logging()
 
     
@@ -120,7 +120,7 @@ class IndexManager:
     
     def _setup_schema(self):
         schema = {
-            "class": self.index_name,
+            "class": self.index_name, 
             "properties": [
                 {
                     "name": "content",
@@ -148,8 +148,10 @@ class IndexManager:
         try:
         
             self.weavite_client.schema.create_class(schema)
+            print('Schema Created')
         except weaviate.exceptions.UnexpectedStatusCodeException:
             pass
+        return 'Schema has been created'
     
 
     def process_chunk(self, chunk: Dict[str, Any]) -> Dict[str, Any]:
@@ -168,7 +170,7 @@ class IndexManager:
         # Process all chunks
         processed_chunks = [self.process_chunk(chunk) for chunk in chunks]
 
-        print('this is the lenght of the processed chunks',len(processed_chunks))
+        # print('this is the lenght of the processed chunks',len(processed_chunks))
         
         # Generate embeddings for all contents at once
         contents = [chunk["content"] for chunk in processed_chunks]
@@ -177,12 +179,12 @@ class IndexManager:
         embed= OpenSourceEmbeddings()
         embeddings = embed.embed_documents(contents)
 
-        np.save('Data/pdf_embedding.npy', embeddings)
-        loaded_embeddings=np.load('Data/pdf_embedding.npy')
+        # np.save('Data/pdf_embedding.npy', embeddings)
+        # loaded_embeddings=np.load('Data/pdf_embedding.npy')
         
         # Add chunks to Weaviate with their vectors
         with self.weavite_client.batch as batch:
-            for chunk_data, vector in zip(processed_chunks, loaded_embeddings):
+            for chunk_data, vector in zip(processed_chunks, embeddings):
                 batch.add_data_object(
                     data_object=chunk_data,
                     class_name=self.index_name,
@@ -190,7 +192,7 @@ class IndexManager:
                     vector=vector
                 )
                 
-        return processed_chunks, loaded_embeddings
+        return processed_chunks,embeddings
 
     def search(self, query: str, k: int = 2, filters: Dict[str, Any] = None):
         """

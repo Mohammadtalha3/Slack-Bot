@@ -245,15 +245,6 @@ class RagEngine:
         
         return chunks
 
-
-    
-
-
-    
-        
-   
-    
-
     
     def Data_loading(self):
 
@@ -267,6 +258,7 @@ class RagEngine:
                 full_text += page.extract_text(x_tolerance=1.5, y_tolerance=1.5, layout=True)
             
             return full_text
+            
 
 
 
@@ -303,7 +295,7 @@ class RagEngine:
         # Format results
         if results and "data" in results and "Get" in results["data"]:
             objects = results["data"]["Get"][self.index_name]
-            return [(obj, obj.get("_additional", {}).get("certainty", 0)) 
+            return [(obj, obj.get("_additional", {}).get("certainty", 0))
                    for obj in objects]
         return []
     
@@ -312,33 +304,18 @@ if __name__ == "__main__":
     # Initialize the retriever
     retriever = RagEngine()
     cleaner= DocumentCleaner()
-    # retriever.Index.add_chunks()
+    
     # loading Data 
     data_loaded=retriever.Data_loading()
 # Calling Chunking function
     chunks = retriever.chunk_document(data_loaded)
-    cleaned_chunks=cleaner.process_chunks(chunks)
-
-    print(cleaned_chunks)
-
     
-
-
-    # print("Original content:")
-    # print(chunks['content'])
-    # print("\nCleaned content:")
-    # print(cleaned_chunks[0]['content'])
-
+    # cleaned_chunks=cleaner.process_chunks(chunks)
 
     # Storing Chunks in weaviate( vector Store)
-    # Indexing=retriever.Index.add_chunks(chunks)
-
-
-    
+    Indexing=retriever.Index.add_chunks(chunks)
 
     
-
-    # print('This is zipped data',zipped_data[:100])
     
 
 

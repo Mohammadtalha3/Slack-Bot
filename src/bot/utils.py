@@ -5,8 +5,6 @@ from .retrival_Engine import DocumentRetriever
 # from langchain_core.prompts import PromptTemplate
 
 
-
-
 class ResponseModel:
 
 # This function takes message and we responed with LLM generated response 
@@ -21,20 +19,18 @@ class ResponseModel:
 
         relevant_chunk= retriver.search(message)
 
-        print('this is the relevant chunk received', relevant_chunk)
+        # print('This is the relevant chunk', relevant_chunk)
+        relevant_chunks=relevant_chunk['data']['Get']['Documentation'][0]['content']
+
+        print('this is the relevant chunk received', relevant_chunks)
 
         # Using promptTemplate modules from the langchain 
         # prompt_template="This is a Retrieval-Augmented Generation (RAG) system. Here is the user's query: {query}. Below is the relevant information retrieved: {chunk} also give the retrived chunk in relevant part and also rate the retrived chunk bassed on the query  and if retrived content has example liek html or code always add that in response."
-        prompt_template= 'Summarize the retrived chunk if you detect code specially keep it in the response. Here is the chunk {query}'
-        formatted_prompt = prompt_template.format(query=relevant_chunk)
+        prompt_template= 'This is the user query -> {query} detect the code and response base on the chunk recieved and the user query'
+        formatted_prompt = prompt_template.format(query=relevant_chunks)
 
         return model.invoke(formatted_prompt)
     
-
-# data=ResponseModel()
-# dt2=data.response_model(message='How to use templates in django?')
-
-# print(dt2)
     
 
     

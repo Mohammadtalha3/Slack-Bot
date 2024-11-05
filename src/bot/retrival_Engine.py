@@ -157,7 +157,21 @@ if __name__ == "__main__":
     # results = retriever.search_with_metadata(query, k=3)
     search_results = retriever.search(query, k=3)
 
-    print(search_results['data']['Get']['Documentation'][0])
+    print(search_results)
+
+    # client=weaviate.Client('http://localhost:8080')
+    # class_name='Documentation'
+    # results= client.query.get(class_name,['content']).do()
+
+    # if results and 'data' in results and 'Get' in results['data']:
+    #     objects= results['data']['Get'][class_name]
+    #     for obj in objects:
+    #         print(obj)
+    
+
+    
+
+    
 
     # from pprint import pprint
 
