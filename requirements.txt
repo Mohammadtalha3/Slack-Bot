@@ -1,0 +1,13 @@
+django
+python-decouple
+requests
+Celery
+Redis
+python-dotenv
+django-celery-beat
+django-celery-results
+ollama
+llama-index
+llama-parse
+langchain-ollama
+jupyter

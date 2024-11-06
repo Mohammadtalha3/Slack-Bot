@@ -1,0 +1,9 @@
+{
+    "version": 2,
+    "builds": [
+      { "src": "bot/views.py", "use": "@vercel/python" }
+    ],
+    "routes": [
+      { "src": "/ChatBot/(.*)", "dest": "api/slack.py" }
+    ]
+  }
