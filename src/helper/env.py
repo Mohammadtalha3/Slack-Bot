@@ -6,6 +6,8 @@ from decouple import Config, RepositoryEnv
 
 
 
+
+
 THIS_DIR= pathlib.Path(__file__).resolve().parent
 BASE_DIR= THIS_DIR.parent
 BASE_DIR_ENV=  BASE_DIR / ".env"

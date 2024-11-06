@@ -1,5 +1,6 @@
 django
 python-decouple
+decouple
 requests
 Celery
 Redis
