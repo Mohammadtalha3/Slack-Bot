@@ -1,0 +1,101 @@
+version: '3.8'
+
+services:
+  ollama:
+    build:
+      context: .
+      dockerfile: Dockerfile.ollama
+    ports:
+      - "11434:11434"  # Expose port 11434 to host (can be changed if needed)
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+    restart: always
+    networks:
+      - backend-network  # Use a network to link services
+
+  weaviate:
+    command:
+      - --host
+      - 0.0.0.0
+      - --port
+      - '8080'
+      - --scheme
+      - http
+    image: cr.weaviate.io/semitechnologies/weaviate:1.27.1
+    environment:
+      QUERY_DEFAULTS_LIMIT: 25
+      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: 'true'
+      PERSISTENCE_DATA_PATH: '/var/lib/weaviate'
+      DEFAULT_VECTORIZER_MODULE: 'none'
+      ENABLE_API_BASED_MODULES: 'true'
+      CLUSTER_HOSTNAME: 'node1'
+      
+    ports:
+      - "8080:8080"  # Expose Weaviate on port 8080
+      
+    volumes:
+      - weaviate-data:/var/lib/weaviate  # Persist Weaviate data
+    restart: always
+    networks:
+      - backend-network
+
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: django-backend
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"  # Expose Django's port
+    depends_on:
+      - redis
+      - ollama
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+    volumes:
+      - .:/slackbot  # Optional: mounts project directory for development
+    networks:
+      - backend-network
+
+  celery:
+    build:
+      context: .
+      dockerfile: Dockerfile.celery
+    container_name: celery-worker
+    depends_on:
+      - redis
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - DJANGO_SETTINGS_MODULE=slackbot.settings
+    volumes:
+      - .:/slackbot
+    networks:
+      - backend-network
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - backend-network
+
+  # ollama:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.ollama
+  #   container_name: ollama
+  #   ports:
+  #     - "3000:3000"  # Port for Ollama, adjust if necessary
+  #   networks:
+  #     - backend-network
+
+networks:
+  backend-network:
+    driver: bridge
+
+volumes:
+  weaviate-data:
+    driver: local

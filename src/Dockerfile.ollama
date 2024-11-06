@@ -1,0 +1,21 @@
+# Use an appropriate base image
+FROM ubuntu:20.04
+
+# Set environment variables to prevent interactive prompts during the build
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install necessary dependencies for downloading and running Ollama
+RUN apt-get update && apt-get install -y \
+    curl \
+    wget \
+    tar \
+    && rm -rf /var/lib/apt/lists/*
+
+# Download and install Ollama
+RUN curl -fsSL https://ollama.com/install.sh | sh
+
+# Expose the internal Ollama port to the container
+EXPOSE 11434
+
+# Set the command to run Ollama, assuming it runs on 11434 by default
+CMD ["ollama", ]

@@ -1,0 +1,12 @@
+FROM python:3.10-slim
+
+WORKDIR /slackbot
+
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+
+COPY . /slackbot/
+
+CMD [ "celery","-A", "slackbot","worker","--loglevel=info" ]

@@ -1,0 +1,17 @@
+FROM  python:3.10-slim
+
+WORKDIR /slackbot
+
+#Install dependencies 
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# copy the app code
+COPY . /slackbot/
+
+
+EXPOSE 8080
+
+CMD ["gunicorn ", "slackbot.wsgi:application""--bind", "0.0.0.0:8000", ]
+
+
