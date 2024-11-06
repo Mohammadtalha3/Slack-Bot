@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     "django_celery_results",
     "bot",
     "nbs",
-    "slackbot",
+    
 ]
 
 MIDDLEWARE = [
