@@ -9,4 +9,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . /slackbot/
 
-CMD [ "celery","-A", "slackbot","worker","--loglevel=info" ]
+CMD [ "celery","-A","slackbot","worker","--loglevel=info" ]

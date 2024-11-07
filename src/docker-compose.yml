@@ -69,6 +69,7 @@ services:
     environment:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - DJANGO_SETTINGS_MODULE=slackbot.settings
+      - SLACK_BOT_OAUTH=${SLACK_BOT_OAUTH}
     volumes:
       - .:/slackbot
     networks:
