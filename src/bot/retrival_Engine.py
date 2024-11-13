@@ -1,7 +1,6 @@
 # from Document_processing import DocumentPreprocessing
 from sentence_transformers import SentenceTransformer
 from typing import List,Dict, Any
-import weaviate
 import uuid
 
 
@@ -19,6 +18,7 @@ class OpenSourceEmbeddings:
 class DocumentRetriever:
     def __init__(self, weaviate_url: str = "http://localhost:8080"):
         self.embeddings =OpenSourceEmbeddings()
+        import weaviate
         self.client = weaviate.Client(
             url=weaviate_url,
             additional_headers={
@@ -153,25 +153,11 @@ if __name__ == "__main__":
     # query= "What are forms used for?"
     # query= "FAQ: Databases and models"
     # query= 'Does Django support NoSQL databases?'
-    query= "how to design your  model"
+    query= "Building a form "
     # results = retriever.search_with_metadata(query, k=3)
     search_results = retriever.search(query, k=3)
 
-    print(search_results['data']['Get']['Documentation'][0]['content'][:1000])
-
-    # client=weaviate.Client('http://localhost:8080')
-    # class_name='Documentation'
-    # results= client.query.get(class_name,['content']).do()
-
-    # if results and 'data' in results and 'Get' in results['data']:
-    #     objects= results['data']['Get'][class_name]
-    #     for obj in objects:
-    #         print(obj)
-    
-
-    
-
-    
+    print(search_results['data']['Get']['Documentation'][0])
 
     # from pprint import pprint
 

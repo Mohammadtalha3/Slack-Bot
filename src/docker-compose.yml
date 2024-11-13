@@ -1,17 +1,17 @@
 version: '3.8'
 
 services:
-  ollama:
-    build:
-      context: .
-      dockerfile: Dockerfile.ollama
-    ports:
-      - "11434:11434"  # Expose port 11434 to host (can be changed if needed)
-    environment:
-      - OLLAMA_HOST=0.0.0.0
-    restart: always
-    networks:
-      - backend-network  # Use a network to link services
+  # ollama:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.ollama
+  #   ports:
+  #     - "11434:11434"  # Expose port 11434 to host (can be changed if needed)
+  #   environment:
+  #     - OLLAMA_HOST=0.0.0.0
+  #   restart: always
+  #   networks:
+  #     - backend-network  # Use a network to link services
 
   weaviate:
     command:
@@ -51,13 +51,13 @@ services:
       - "8000:8000"  # Expose Django's port
     depends_on:
       - redis
-      - ollama
     environment:
       - CELERY_BROKER_URL=redis://redis:6379/0
     volumes:
       - .:/slackbot  # Optional: mounts project directory for development
     networks:
       - backend-network
+    command: gunicorn slackbot.wsgi:application --bind 0.0.0.0:8000
 
   celery:
     build:
@@ -71,7 +71,7 @@ services:
       - DJANGO_SETTINGS_MODULE=slackbot.settings
       - SLACK_BOT_OAUTH=${SLACK_BOT_OAUTH}
     volumes:
-      - .:/slackbot
+      - .:/app
     networks:
       - backend-network
 
