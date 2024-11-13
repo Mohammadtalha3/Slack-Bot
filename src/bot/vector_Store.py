@@ -5,6 +5,7 @@ from Document_processing import *
 from retrival_Engine import  OpenSourceEmbeddings
 import numpy as np
 import re
+from typing import List,Tuple
 
 class DocumentCleaner:
     def __init__(self):
@@ -164,24 +165,37 @@ class IndexManager:
             "language": chunk.get("Code Info", {}).get("language"),
             "filename": chunk.get("Code Info", {}).get("filename")
         }
-        
-    def add_chunks(self, chunks: List[Dict[str, Any]]) -> int:
-        """Add document chunks to Weaviate with their embeddings"""
+    def create_combined_text(self, chunk: Dict[str, Any]) -> str:
+        """Create combined text from title and content for embedding"""
+        combined_text = ""
+        if chunk.get("title"):
+            combined_text += f"Title: {chunk['title']}\n"
+        if chunk.get("content"):
+            combined_text += f"Content: {chunk['content']}"
+        return combined_text.strip()
+
+    def add_chunks(self, chunks: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], List[List[float]]]:
+        """
+        Add document chunks to Weaviate with their embeddings
+
+        Args:
+            chunks: List of document chunks
+
+        Returns:
+            Tuple containing:
+            - List of processed chunks
+            - List of embeddings
+        """
         # Process all chunks
         processed_chunks = [self.process_chunk(chunk) for chunk in chunks]
 
-        # print('this is the lenght of the processed chunks',len(processed_chunks))
-        
-        # Generate embeddings for all contents at once
-        contents = [chunk["content"] for chunk in processed_chunks]
+        # Create combined text for each chunk (title + content)
+        combined_texts = [self.create_combined_text(chunk) for chunk in processed_chunks]
 
-        # print('This is the content ', contents)
-        embed= OpenSourceEmbeddings()
-        embeddings = embed.embed_documents(contents)
+        # Generate embeddings for combined texts
+        embed = OpenSourceEmbeddings()
+        embeddings = embed.embed_documents(combined_texts)
 
-        # np.save('Data/pdf_embedding.npy', embeddings)
-        # loaded_embeddings=np.load('Data/pdf_embedding.npy')
-        
         # Add chunks to Weaviate with their vectors
         with self.weavite_client.batch as batch:
             for chunk_data, vector in zip(processed_chunks, embeddings):
@@ -191,8 +205,37 @@ class IndexManager:
                     uuid=uuid.uuid4(),
                     vector=vector
                 )
+
+        return processed_chunks, embeddings
+        
+    # def add_chunks(self, chunks: List[Dict[str, Any]]) -> int:
+    #     """Add document chunks to Weaviate with their embeddings"""
+    #     # Process all chunks
+    #     processed_chunks = [self.process_chunk(chunk) for chunk in chunks]
+
+    #     # print('this is the lenght of the processed chunks',len(processed_chunks))
+        
+    #     # Generate embeddings for all contents at once
+    #     contents = [chunk["content"] for chunk in processed_chunks]
+
+    #     # print('This is the content ', contents)
+    #     embed= OpenSourceEmbeddings()
+    #     embeddings = embed.embed_documents(contents)
+
+    #     # np.save('Data/pdf_embedding.npy', embeddings)
+    #     # loaded_embeddings=np.load('Data/pdf_embedding.npy')
+        
+    #     # Add chunks to Weaviate with their vectors
+    #     with self.weavite_client.batch as batch:
+    #         for chunk_data, vector in zip(processed_chunks, embeddings):
+    #             batch.add_data_object(
+    #                 data_object=chunk_data,
+    #                 class_name=self.index_name,
+    #                 uuid=uuid.uuid4(),
+    #                 vector=vector
+    #             )
                 
-        return processed_chunks,embeddings
+    #     return processed_chunks,embeddings
 
     def search(self, query: str, k: int = 2, filters: Dict[str, Any] = None):
         """

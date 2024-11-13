@@ -90,13 +90,14 @@ class RagEngine:
                 code_info['language'] = language
                 break
                 
-        return code_info
+        return code_info   
+
 
     def chunk_document(self,document: str) -> List[Dict]:
         """
         Chunks a document into sections while preserving context and adding metadata.
         """
-        
+      
         chunks = []
         current_chunk = {
             'metadata': {
@@ -115,22 +116,22 @@ class RagEngine:
             'title': '',
             'content': ''
         }
-        
+      
         # Patterns for matching sections, standalone page numbers, and chapter titles
         section_pattern = re.compile(r"^(\d+(\.\d+)*)\s+([^\n]+)")
         page_number_pattern = re.compile(r"^\d+$")
         chapter_pattern = re.compile(r"^\s*CHAPTER\s*$", re.IGNORECASE)
-        
+      
         lines = document.splitlines()
         i = 0
-        
+      
         while i < len(lines):
             line = lines[i].strip()
-            
+          
             if not line:
                 i += 1
                 continue
-                
+              
             chapter_match = chapter_pattern.match(line)
             if chapter_match:
                 if current_chunk['content'] or current_chunk['title']:
@@ -138,16 +139,16 @@ class RagEngine:
                     code_info = self.detect_code_blocks(current_chunk['content'])
                     current_chunk['metadata']['contains_code'] = code_info['is_code']
                     current_chunk['metadata']['code_info'] = code_info if code_info['is_code'] else None
-                    
+                  
                     # Add other metadata
                     current_chunk['metadata']['word_count'] = len(current_chunk['content'].split())
                     current_chunk['metadata']['char_count'] = len(current_chunk['content'])
                     chunks.append(current_chunk)
-                    
+                  
                     if len(chunks) > 0:
                         chunks[-1]['metadata']['next_section'] = 'CHAPTER'
                         current_chunk['metadata']['previous_section'] = chunks[-1]['section']
-                    
+                  
                 current_chunk = {
                     'metadata': {
                         'chunk_type': 'chapter',
@@ -165,18 +166,18 @@ class RagEngine:
                     'title': '',
                     'content': ''
                 }
-                
+              
                 # Rest of your chapter handling code...
                 chapter_text = line
                 i += 1
-                
+              
                 while i < len(lines):
                     next_line = lines[i].strip()
                     if next_line:
                         current_chunk['section'] = f"{chapter_text} {next_line}"
                         current_chunk['metadata']['chunk_type'] = 'chapter'
                         i += 1
-                        
+                      
                         while i < len(lines):
                             next_line = lines[i].strip()
                             if next_line:
@@ -187,7 +188,7 @@ class RagEngine:
                         break
                     i += 1
                 continue
-                    
+                  
             section_match = section_pattern.match(line)
             if section_match:
                 if "." in section_match.group(1):
@@ -196,15 +197,13 @@ class RagEngine:
                         code_info = self.detect_code_blocks(current_chunk['content'])
                         current_chunk['metadata']['contains_code'] = code_info['is_code']
                         current_chunk['metadata']['code_info'] = code_info if code_info['is_code'] else None
-                        
+                      
                         current_chunk['metadata']['word_count'] = len(current_chunk['content'].split())
                         current_chunk['metadata']['char_count'] = len(current_chunk['content'])
                         chunks.append(current_chunk)
-                        
+                      
                         if len(chunks) > 0:
-                            chunks[-1]['metadata']['next_section'] = section_match.group(1)
-
-                            
+                            chunks[-1]['metadata']['next_section'] = section_match.group(1)                          
                     current_chunk = {
                         'metadata': {
                             'chunk_type': 'section',
@@ -222,7 +221,7 @@ class RagEngine:
                         'title': section_match.group(3),
                         'content': ''
                     }
-            
+          
             elif page_number_pattern.match(line):
                 pass
             else:
@@ -230,34 +229,22 @@ class RagEngine:
                     current_chunk['content'] += "\n" + line
                 else:
                     current_chunk['content'] = line
-                    
+                  
             i += 1
-            
+          
         # Process the final chunk
         if current_chunk['content'] or current_chunk['title']:
             code_info = self.detect_code_blocks(current_chunk['content'])
             current_chunk['metadata']['contains_code'] = code_info['is_code']
             current_chunk['metadata']['code_info'] = code_info if code_info['is_code'] else None
-            
+          
             current_chunk['metadata']['word_count'] = len(current_chunk['content'].split())
             current_chunk['metadata']['char_count'] = len(current_chunk['content'])
             chunks.append(current_chunk)
-        
+      
         return chunks
 
     
-    def Data_loading(self):
-
-        document_path= 'Data\django.pdf'
-
-        print('working of loading data...')
-
-        with pdfplumber.open(document_path) as doc:
-            full_text=''
-            for page in doc.pages:
-                full_text += page.extract_text(x_tolerance=1.5, y_tolerance=1.5, layout=True)
-            
-            return full_text
             
 
 
@@ -299,27 +286,55 @@ class RagEngine:
                    for obj in objects]
         return []
     
+    def Data_loading(self):
+
+        document_path= 'Data\django.pdf'
+
+        print('working of loading data...')
+
+        with pdfplumber.open(document_path) as doc:
+            full_text=''
+            for page in doc.pages:
+                full_text += page.extract_text(x_tolerance=1, y_tolerance=1, layout=True)
+            
+            return full_text
+    
 
 if __name__ == "__main__":
     # Initialize the retriever
+#     retriever = RagEngine()
+#     cleaner= DocumentCleaner()
+    
+#     # loading Data 
+#     data_loaded=retriever.Data_loading()
+# # Calling Chunking function
+#     chunks = retriever.chunk_document(data_loaded)
     retriever = RagEngine()
-    cleaner= DocumentCleaner()
-    
-    # loading Data 
-    data_loaded=retriever.Data_loading()
-# Calling Chunking function
+    data_loaded = retriever.Data_loading()
     chunks = retriever.chunk_document(data_loaded)
-    
-    # cleaned_chunks=cleaner.process_chunks(chunks)
 
     # Storing Chunks in weaviate( vector Store)
     Indexing=retriever.Index.add_chunks(chunks)
 
+    print(Indexing)
+
+
+# import json
+
+# # Convert chunks to a list of dictionaries if they are not already
+# with open('chunks.json', 'w') as file:
+#     json.dump(chunks, file, indent=4)
+
+
     
     
 
 
-    # for chunk in chunks:
-    #  print(f"metadata {chunk['metadata']}")
-    #  print(f"Section {chunk['section']}")
-    #  print(f"Content {chunk['content'][:100]}")
+for chunk in chunks:
+
+    
+
+  
+    print(f"metadata {chunk['metadata']}")
+    print(f"Section {chunk['section']}")
+    print(f"Content {chunk['content'][:100]}")

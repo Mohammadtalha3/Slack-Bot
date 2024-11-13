@@ -30,7 +30,7 @@ from .retrival_Engine import DocumentRetriever
 
 class ResponseModel:
     @classmethod
-    def response_model(cls, query, llm_model='t5-large'):
+    def response_model(cls, query, llm_model='t5-small'):
         # Initialize the T5 model and tokenizer
         tokenizer = T5Tokenizer.from_pretrained(llm_model)
         model = T5ForConditionalGeneration.from_pretrained(llm_model)
@@ -41,7 +41,8 @@ class ResponseModel:
 
         # Get relevant chunks based on the user's query
         relevant_chunk = retriever.search(query)
-        relevant_chunks = relevant_chunk['data']['Get']['Documentation'][0]['content']
+        relevant_chunks = relevant_chunk['data']['Get']['Documentation'][0]['content'][:1000]
+        print('this is relevant chunks ', relevant_chunks)
 
         # Format the input for T5 model
         input_text = f"Query: {query} \nRelevant information: {relevant_chunks} \n\nGenerate a response based on this if relevant chunk has code keep in the response."
