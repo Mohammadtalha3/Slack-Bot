@@ -6,6 +6,8 @@ from retrival_Engine import  OpenSourceEmbeddings
 import numpy as np
 import re
 from typing import List,Tuple
+from dotenv import load_dotenv
+import os
 
 class DocumentCleaner:
     def __init__(self):
@@ -92,13 +94,18 @@ class DocumentCleaner:
                     cleaned_chunks.append(chunk)
         
         return cleaned_chunks
+    
 
 
+
+load_dotenv()
+
+redis_url= os.getenv('CELERY_BROKER_URL')
 
 
 class IndexManager:
 
-    def __init__(self, redis_url: str ="redis://localhost:6379",
+    def __init__(self, redis_url= redis_url,
                  weaviate_url: str= "http://localhost:8080" ):
         
         self.weavite_client= weaviate.Client(url=weaviate_url)

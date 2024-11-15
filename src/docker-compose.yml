@@ -24,11 +24,12 @@ services:
     image: cr.weaviate.io/semitechnologies/weaviate:1.27.1
     environment:
       QUERY_DEFAULTS_LIMIT: 25
-      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: 'true'
+      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: 'false'
       PERSISTENCE_DATA_PATH: '/var/lib/weaviate'
       DEFAULT_VECTORIZER_MODULE: 'none'
       ENABLE_API_BASED_MODULES: 'true'
       CLUSTER_HOSTNAME: 'node1'
+      WEAVIATE_METRICS: 'true'
       
     ports:
       - "8080:8080"  # Expose Weaviate on port 8080
@@ -67,7 +68,7 @@ services:
     depends_on:
       - redis
     environment:
-      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=${CELERY_BROKER_URL}
       - DJANGO_SETTINGS_MODULE=slackbot.settings
       - SLACK_BOT_OAUTH=${SLACK_BOT_OAUTH}
     volumes:
@@ -75,13 +76,13 @@ services:
     networks:
       - backend-network
 
-  redis:
-    image: redis:alpine
-    container_name: redis
-    ports:
-      - "6379:6379"
-    networks:
-      - backend-network
+  # redis:
+  #   image: redis:alpine
+  #   container_name: redis
+  #   ports:
+  #     - "6379:6379"
+  #   networks:
+  #     - backend-network
 
   # ollama:
   #   build:

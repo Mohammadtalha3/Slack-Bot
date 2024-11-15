@@ -330,11 +330,7 @@ if __name__ == "__main__":
     
 
 
-for chunk in chunks:
-
-    
-
-  
+for chunk in chunks:  
     print(f"metadata {chunk['metadata']}")
     print(f"Section {chunk['section']}")
     print(f"Content {chunk['content'][:100]}")

@@ -61,3 +61,4 @@ class ResponseModel:
         # Decode and return the generated response
         response = tokenizer.decode(outputs[0], skip_special_tokens=True)
         return response
+        
