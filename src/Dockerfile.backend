@@ -11,7 +11,7 @@ RUN pip show gunicorn
 # copy the app code
 COPY . /app/
 
-WORKDIR /app/src/slackbot
+WORKDIR /app/src
 
 
 EXPOSE 8080

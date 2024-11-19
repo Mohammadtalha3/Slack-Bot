@@ -27,10 +27,11 @@
 
 from transformers import T5Tokenizer, T5ForConditionalGeneration
 from .retrival_Engine import DocumentRetriever
+from transformers import AutoTokenizer, AutoModelForCausalLM
 
 class ResponseModel:
     @classmethod
-    def response_model(cls, query, llm_model='t5-small'):
+    def response_model(cls, query, llm_model='meta-llama/Llama-2-7b-chat-hf"'):
         # Initialize the T5 model and tokenizer
         tokenizer = T5Tokenizer.from_pretrained(llm_model)
         model = T5ForConditionalGeneration.from_pretrained(llm_model)
@@ -41,7 +42,7 @@ class ResponseModel:
 
         # Get relevant chunks based on the user's query
         relevant_chunk = retriever.search(query)
-        relevant_chunks = relevant_chunk['data']['Get']['Documentation'][0]['content'][:1000]
+        relevant_chunks = relevant_chunk['data']['Get']['Documentation'][0]['content'][:10000]
         print('this is relevant chunks ', relevant_chunks)
 
         # Format the input for T5 model
@@ -53,7 +54,7 @@ class ResponseModel:
         # Generate a response
         outputs = model.generate(
             **inputs, 
-            max_length=200,       # Max response length
+            max_length=300,       # Max response length
             num_beams=5,          # Beam search for better quality
             early_stopping=True   # Stop early if a response is good enough
         )

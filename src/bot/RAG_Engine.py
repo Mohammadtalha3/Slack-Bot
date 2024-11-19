@@ -313,10 +313,12 @@ if __name__ == "__main__":
     data_loaded = retriever.Data_loading()
     chunks = retriever.chunk_document(data_loaded)
 
-    # Storing Chunks in weaviate( vector Store)
-    Indexing=retriever.Index.add_chunks(chunks)
+    
 
-    print(Indexing)
+    # Storing Chunks in weaviate( vector Store)
+    # Indexing=retriever.Index.add_chunks(chunks)
+
+    # print(Indexing)
 
 
 # import json

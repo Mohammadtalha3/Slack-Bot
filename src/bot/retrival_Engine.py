@@ -153,7 +153,8 @@ if __name__ == "__main__":
     # query= "What are forms used for?"
     # query= "FAQ: Databases and models"
     # query= 'Does Django support NoSQL databases?'
-    query= "Building a form "
+    # query= "Building a form "
+    query=' Generic date views'
     # results = retriever.search_with_metadata(query, k=3)
     search_results = retriever.search(query, k=3)
 
